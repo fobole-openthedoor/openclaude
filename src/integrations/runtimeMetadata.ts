@@ -33,6 +33,7 @@ import {
   isAudnReasoningModel,
   AUDN_REASONING_OPENAI_SHIM,
 } from './audnPlatform.js'
+import { applyForkReasoningReplayDefault } from './forkReasoningReplay.js'
 import {
   getCachedXaiCredentials,
   getXaiDiscoveryCacheIdentity,
@@ -333,14 +334,17 @@ export function resolveOpenAIShimRuntimeContext(options?: {
     // Sanitize AIMLAPI attribution headers AFTER merging every layer: a
     // catalog- or model-level `openaiShim.headers` override could otherwise
     // reintroduce the partner/attribution headers on a proxy endpoint.
-    openaiShimConfig: resolveRouteOpenAIShimConfig(
-      routeId,
-      effectiveBaseUrl,
-      mergeOpenAIShimConfig(
-        descriptor?.transportConfig.openaiShim,
-        catalogEntry?.transportOverrides?.openaiShim,
-        inferredConfig,
+    openaiShimConfig: applyForkReasoningReplayDefault(
+      resolveRouteOpenAIShimConfig(
+        routeId,
+        effectiveBaseUrl,
+        mergeOpenAIShimConfig(
+          descriptor?.transportConfig.openaiShim,
+          catalogEntry?.transportOverrides?.openaiShim,
+          inferredConfig,
+        ),
       ),
+      { baseUrl: effectiveBaseUrl, processEnv: runtimeEnv },
     ),
   }
 }

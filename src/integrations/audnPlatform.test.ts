@@ -36,7 +36,7 @@ describe('audn platform roster', () => {
       baseUrl: 'https://example-gateway.test/v1',
       processEnv: { CLAUDE_CODE_USE_OPENAI: '1' },
     })
-    expect(result.openaiShimConfig.preserveReasoningContent).toBeUndefined()
+    expect(result.openaiShimConfig.preserveReasoningContent).toBe(true)
   })
 
   test('does not false-positive on similarly named aliases', () => {

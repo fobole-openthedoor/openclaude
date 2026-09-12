@@ -34,6 +34,7 @@ import {
   normalizeOllamaNativeMessages,
 } from './ollamaAdapter.js'
 import { createRequestBodyPlanner } from './requestPlanner.js'
+import { logForDebugging } from '../../../utils/debug.js'
 
 type RawMessage = {
   role: string
@@ -192,6 +193,17 @@ export function prepareOpenAIRequest({
       supportsImageInputs: shimConfig.supportsImageInputs,
     })
     : undefined
+  if (openaiMessages && shimConfig.preserveReasoningContent) {
+    const replayed = openaiMessages.filter(
+      message =>
+        message.role === 'assistant' &&
+        typeof message.reasoning_content === 'string' &&
+        message.reasoning_content.trim().length > 0,
+    ).length
+    logForDebugging(
+      `[OpenAIShim] reasoning replay model=${request.resolvedModel} assistant_with_reasoning=${replayed}/${openaiMessages.filter(m => m.role === 'assistant').length}`,
+    )
+  }
 
   const reasoningControl = resolveModelReasoningControl(runtimeModel, {
     routeId: runtimeShimContext.routeId,

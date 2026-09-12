@@ -305,6 +305,44 @@ test('preserveReasoningContent keeps thinking-only assistant history as reasonin
   })
 })
 
+test('beefsms happy/qwen-3.8-fast still replays split thinking via fork default', async () => {
+  const { resolveOpenAIShimRuntimeContext } = await import(
+    '../../../integrations/runtimeMetadata.js'
+  )
+  const shim = resolveOpenAIShimRuntimeContext({
+    model: 'happy/qwen-3.8-fast',
+    baseUrl: 'http://openai.beefsms.com:38888/v1',
+    processEnv: {
+      CLAUDE_CODE_USE_OPENAI: '1',
+      OPENAI_BASE_URL: 'http://openai.beefsms.com:38888/v1',
+      OPENAI_MODEL: 'happy/qwen-3.8-fast',
+    },
+  }).openaiShimConfig
+  expect(shim.preserveReasoningContent).toBe(true)
+
+  const messages = convertMessages(
+    [
+      { role: 'user', content: 'go' },
+      { role: 'assistant', content: [{ type: 'thinking', thinking: 'Already planned the next grep.' }] },
+      {
+        role: 'assistant',
+        content: [{ type: 'tool_use', id: 'call_1', name: 'Bash', input: { command: 'true' } }],
+      },
+      {
+        role: 'user',
+        content: [{ type: 'tool_result', tool_use_id: 'call_1', content: 'ok' }],
+      },
+    ],
+    '',
+    {
+      preserveReasoningContent: shim.preserveReasoningContent,
+      reasoningContentFallback: shim.reasoningContentFallback,
+    },
+  )
+  expect(messages[1]?.reasoning_content).toBe('Already planned the next grep.')
+  expect(messages[1]?.tool_calls?.[0]?.function.name).toBe('Bash')
+})
+
 test('preserveReasoningContent coalesces split thinking + tool_use assistant rows', () => {
   const messages = convertMessages([
     { role: 'user', content: 'squash to one commit' },
