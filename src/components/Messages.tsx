@@ -30,6 +30,7 @@ import { isFullscreenEnvEnabled } from '../utils/fullscreen.js';
 import { applyGrouping } from '../utils/groupToolUses.js';
 import { buildMessageLookups, createAssistantMessage, deriveUUID, getMessagesAfterCompactBoundary, getToolUseID, getToolUseIDs, hasUnresolvedHooksFromLookup, isNotEmptyMessage, normalizeMessages, normalizeMessagesCached, reorderMessagesInUI, type StreamingThinking, type StreamingToolUse, shouldShowUserMessage } from '../utils/messages.js';
 import { plural } from '../utils/stringUtils.js';
+import { clipThinkingViewport } from '../utils/thinkingViewport.js';
 import { renderableSearchText } from '../utils/transcriptSearch.js';
 import { Divider } from './design-system/Divider.js';
 import type { UnseenDivider } from './FullscreenLayout.js';
@@ -719,7 +720,7 @@ const MessagesImpl = ({
       {isStreamingThinkingVisible && streamingThinking && !isBriefOnly && <Box marginTop={1}>
           <AssistantThinkingMessage param={{
         type: 'thinking',
-        thinking: streamingThinking.thinking
+        thinking: clipThinkingViewport(streamingThinking.thinking)
       }} addMargin={false} isTranscriptMode={true} verbose={verbose} hideInTranscript={false} />
         </Box>}
     </>;

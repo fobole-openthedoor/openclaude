@@ -50,6 +50,8 @@ export type BuiltinStatusData = {
   contextUsedPercent: number | null;
   /** Current input token count (including cache), or null. */
   contextInputTokens: number | null;
+  /** Last-turn output tokens, or null. */
+  contextOutputTokens: number | null;
   /** Model context window size in tokens. */
   contextWindow: number | null;
   /** When true, token counts are transcript-based estimates (e.g. all-zero provider response). */
@@ -89,6 +91,16 @@ export function buildBuiltinStatusSegments(data: BuiltinStatusData): StatusSegme
       shortText,
       // Thresholds align with the auto-compact warnings
       color: roundedPct >= 90 ? 'error' : roundedPct >= 70 ? 'warning' : undefined
+    });
+  }
+  if (data.contextOutputTokens != null) {
+    const up = formatTokenCount(data.contextInputTokens ?? 0)
+    const down = formatTokenCount(data.contextOutputTokens)
+    segments.push({
+      key: 'io',
+      priority: 1,
+      text: `↑${up} ↓${down}`,
+      shortText: `↓${down}`
     });
   }
   if (data.costUSD > 0) {
@@ -205,6 +217,7 @@ function BuiltinStatusLineInner({
       modelName: renderModelName(runtimeModel),
       contextUsedPercent: contextPercentages.used,
       contextInputTokens: inputTokens,
+      contextOutputTokens: currentUsage?.output_tokens ?? null,
       contextWindow: contextWindowSize,
       contextIsEstimated: currentUsage?.is_estimated,
       costUSD: getTotalCost()

@@ -65,6 +65,52 @@ test('interleaved input_json_delta preserves tool order and updates only the mat
   expect(get()[2]!.unparsedToolInput).toBe('{"c":')
 })
 
+test('thinking_delta accumulates into onStreamingThinking while streaming', () => {
+  const noop = (): void => {}
+  let thinking: { thinking: string; isStreaming: boolean } | null = null
+  const feed = (event: StreamEvent): void =>
+    handleMessageFromStream(
+      event,
+      noop,
+      noop,
+      noop,
+      () => [],
+      undefined,
+      f => {
+        thinking = f(thinking)
+      },
+    )
+
+  feed({
+    type: 'stream_event',
+    event: {
+      type: 'content_block_start',
+      index: 0,
+      content_block: { type: 'thinking', thinking: '' },
+    },
+  } as unknown as StreamEvent)
+  expect(thinking).toEqual({ thinking: '', isStreaming: true })
+
+  feed({
+    type: 'stream_event',
+    event: {
+      type: 'content_block_delta',
+      index: 0,
+      delta: { type: 'thinking_delta', thinking: '先看' },
+    },
+  } as unknown as StreamEvent)
+  feed({
+    type: 'stream_event',
+    event: {
+      type: 'content_block_delta',
+      index: 0,
+      delta: { type: 'thinking_delta', thinking: ' git log' },
+    },
+  } as unknown as StreamEvent)
+
+  expect(thinking).toEqual({ thinking: '先看 git log', isStreaming: true })
+})
+
 test('input_json_delta for an unknown index returns the same array reference', () => {
   const { feed, get } = makeHarness()
   feed(toolStart(0, 'a', 'toolA'))
