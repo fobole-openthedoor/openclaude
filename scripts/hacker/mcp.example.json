@@ -1,0 +1,12 @@
+{
+  "ghidra": {
+    "type": "stdio",
+    "command": "re-mcp-ghidra",
+    "args": ["stdio"],
+    "env": {
+      "GHIDRA_INSTALL_DIR": "__GHIDRA_HOME__",
+      "GHIDRA_HOME": "__GHIDRA_HOME__",
+      "JAVA_HOME": "__JAVA_HOME__"
+    }
+  }
+}

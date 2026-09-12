@@ -11,6 +11,13 @@ set -a
 . "$ENV_FILE"
 set +a
 
+case "${OPENAI_API_KEY:-}" in
+  ""|"PASTE_YOUR_BEEFSMS_KEY_HERE"|*"set in ~/.config/openclaude/env"*)
+    echo "openclaude: set OPENAI_API_KEY in $ENV_FILE (beefsms key, not committed)" >&2
+    exit 1
+    ;;
+esac
+
 # Node crashes with uv_cwd if this shell is sitting in a deleted directory.
 recover_cwd() {
   if pwd >/dev/null 2>&1; then

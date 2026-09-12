@@ -1,0 +1,39 @@
+{
+  "hasCompletedOnboarding": true,
+  "lastOnboardingVersion": "99.0.0",
+  "officialMarketplaceAutoInstalled": true,
+  "officialMarketplaceAutoInstallAttempted": true,
+  "flickerFreeMode": true,
+  "verbose": true,
+  "toolHistoryCompressionEnabled": false,
+  "maxMessagesCompactionThreshold": "off",
+  "activeProviderProfileId": "beefsms",
+  "providerProfiles": [
+    {
+      "id": "beefsms",
+      "name": "beefsms",
+      "provider": "openai",
+      "baseUrl": "http://openai.beefsms.com:38888/v1",
+      "model": "happy/kimi-k3,happy/glm-5.3,happy/qwen-3.8-fast",
+      "apiFormat": "chat_completions"
+    }
+  ],
+  "additionalModelOptionsCache": [
+    {
+      "value": "happy/glm-5.3",
+      "label": "happy/glm-5.3",
+      "description": "Served by proxy (happy/glm-5.3)"
+    },
+    {
+      "value": "happy/kimi-k3",
+      "label": "happy/kimi-k3",
+      "description": "Served by proxy (happy/kimi-k3)"
+    },
+    {
+      "value": "happy/qwen-3.8-fast",
+      "label": "happy/qwen-3.8-fast",
+      "description": "Served by proxy (happy/qwen-3.8-fast)"
+    }
+  ],
+  "mcpServers": {}
+}

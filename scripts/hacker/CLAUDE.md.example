@@ -1,0 +1,13 @@
+# OpenClaude user memory
+
+Reverse-engineering pack lives at `__REVERSE_SKILL_ROOT__` (`REVERSE_SKILL_ROOT`). Use the bundled `/reverse-skill` skill; it routes to one PRIMARY module.
+
+- Rules: `__REVERSE_SKILL_ROOT__/RULES.md`
+- Tool index: `__REVERSE_SKILL_ROOT__/skills/tool-index.md`
+- Ghidra: `__GHIDRA_HOME__` (`GHIDRA_INSTALL_DIR`, `analyzeHeadless`)
+
+## Web search
+
+Do **not** curl `127.0.0.1:8399`, `grok-search`, or `systemctl grok-search`. That service is gone.
+
+For news / current web info, use the built-in **WebSearch** tool (Brave). Use **WebFetch** to read a specific URL. Do not invent a local search API.

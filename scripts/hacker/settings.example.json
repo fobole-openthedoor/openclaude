@@ -1,0 +1,57 @@
+{
+  "env": {
+    "OPENAI_MODEL": "happy/kimi-k3",
+    "ANTHROPIC_CUSTOM_MODEL_OPTIONS": "[{\"value\":\"happy/glm-5.3\",\"label\":\"happy/glm-5.3\",\"description\":\"Served by proxy (happy/glm-5.3)\"},{\"value\":\"happy/kimi-k3\",\"label\":\"happy/kimi-k3\",\"description\":\"Served by proxy (happy/kimi-k3)\"},{\"value\":\"happy/qwen-3.8-fast\",\"label\":\"happy/qwen-3.8-fast\",\"description\":\"Served by proxy (happy/qwen-3.8-fast)\"}]"
+  },
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allowBypassPermissionsMode": true
+  },
+  "model": "happy/kimi-k3",
+  "availableModels": [
+    "happy/glm-5.3",
+    "happy/kimi-k3",
+    "happy/qwen-3.8-fast"
+  ],
+  "alwaysThinkingEnabled": true,
+  "modelLimits": {
+    "happy/glm-5.3": {
+      "contextWindow": 1048576,
+      "maxOutputTokens": 16384
+    },
+    "happy/kimi-k3": {
+      "contextWindow": 1048576,
+      "maxOutputTokens": 8192
+    },
+    "happy/qwen-3.8-fast": {
+      "contextWindow": 1048576,
+      "maxOutputTokens": 8192
+    }
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "autoCompactEnabled": false,
+  "statusLine": {
+    "type": "command",
+    "command": "__OPENCLAUDE_STATUSLINE__"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "__GLM_HOOK__"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "commit-commands@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true
+  }
+}
