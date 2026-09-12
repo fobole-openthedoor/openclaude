@@ -44,4 +44,8 @@ else
   fi
 fi
 
-exec sh "$PREFIX/scripts/hacker/install.sh"
+sh "$PREFIX/scripts/hacker/install.sh"
+if [ "${OPENCLAUDE_WITH_REVERSE:-0}" = "1" ]; then
+  echo "openclaude-bootstrap: installing reverse stack"
+  sh "$PREFIX/scripts/hacker/install-reverse.sh"
+fi

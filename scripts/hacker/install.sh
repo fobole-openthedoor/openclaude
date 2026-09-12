@@ -169,33 +169,8 @@ if command -v re-mcp-ghidra >/dev/null 2>&1 || [ -x "$HOME/.local/bin/re-mcp-ghi
   if [ -z "$MCP_CMD" ]; then
     MCP_CMD="$HOME/.local/bin/re-mcp-ghidra"
   fi
-  python3 - "$CONFIG_DIR/.openclaude.json" "$MCP_CMD" "$GHIDRA_HOME" "$JAVA_HOME_VAL" <<'PY'
-import json, os, sys
-path, cmd, ghidra, java = sys.argv[1:5]
-data = {}
-if os.path.isfile(path):
-    with open(path, encoding="utf-8") as f:
-        data = json.load(f)
-servers = data.setdefault("mcpServers", {})
-if "ghidra" not in servers:
-    servers["ghidra"] = {
-        "type": "stdio",
-        "command": cmd,
-        "args": ["stdio"],
-        "env": {
-            "GHIDRA_INSTALL_DIR": ghidra,
-            "GHIDRA_HOME": ghidra,
-            "JAVA_HOME": java,
-        },
-    }
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
-        f.write("\n")
-    os.chmod(path, 0o600)
-    print("openclaude-install: wired ghidra MCP")
-else:
-    print("openclaude-install: keeping existing ghidra MCP")
-PY
+  python3 "$KIT/wire-ghidra-mcp.py" \
+    "$CONFIG_DIR/.openclaude.json" "$MCP_CMD" "$GHIDRA_HOME" "$JAVA_HOME_VAL"
 else
   echo "openclaude-install: re-mcp-ghidra not on PATH — skip MCP (optional)"
 fi
@@ -204,3 +179,5 @@ echo "openclaude-install: done"
 echo "openclaude-install: $PREFIX @ $(git -C "$PREFIX" log -1 --oneline)"
 echo "openclaude-install: set OPENAI_API_KEY in $ENV_FILE (beefsms), then: openclaude"
 echo "openclaude-install: later: openclaude update   (or $KIT/update.sh)"
+echo "openclaude-install: reverse env: $KIT/install-reverse.sh"
+echo "openclaude-install: or paste $KIT/PROMPT.md to another AI"

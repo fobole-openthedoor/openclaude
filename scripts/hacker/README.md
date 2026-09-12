@@ -71,19 +71,42 @@ openclaude update
 ~/openclaude/scripts/hacker/update.sh
 ```
 
-## Optional: Ghidra MCP + reverse-skill
+## Reverse-engineering stack
 
-Not cloned by `install.sh`. If you already have them:
+Ghidra is ~570MB, so it is **not** in the default OpenClaude bootstrap. Two ways:
 
-- pack at `$HOME/tools/reverse-skill`
-- Ghidra at `$HOME/tools/ghidra`
-- `re-mcp-ghidra` on `PATH`
+### Script (this machine's versions, pinned)
 
-re-run `install.sh` and it will wire MCP + `CLAUDE.md` + the reverse-skill adapter. Or copy:
+```sh
+~/openclaude/scripts/hacker/install-reverse.sh
+~/openclaude/scripts/hacker/verify-reverse.sh
+```
 
-- `mcp.example.json` → merge into `~/.audncode-platform/.openclaude.json` `mcpServers`
-- `CLAUDE.md.example` → `~/.audncode-platform/CLAUDE.md`
-- `skills/reverse-skill/SKILL.md` → `~/.audncode-platform/skills/reverse-skill/SKILL.md`
+Skip the zip with `--skip-ghidra` if you already have `$HOME/tools/ghidra`. Pins live in `reverse-versions.env`.
+
+Or one shot after clone:
+
+```sh
+OPENCLAUDE_WITH_REVERSE=1 \
+  curl -fsSL https://raw.githubusercontent.com/fobole-openthedoor/openclaude/preserve-reasoning-history/scripts/hacker/bootstrap.sh | sh
+```
+
+### Give an AI the prompt
+
+Copy the fenced block in [`PROMPT.md`](PROMPT.md) and paste it to any coding agent. It will clone this branch, run both installers, and stop for the user to fill `OPENAI_API_KEY`.
+
+What that installs (matching the reference host):
+
+| Piece | Version / path |
+| --- | --- |
+| reverse-skill | `https://github.com/zhaoxuya520/reverse-skill` → `$HOME/tools/reverse-skill` |
+| Ghidra | 12.1.3 PUBLIC → `$HOME/tools/ghidra` |
+| jadx | 1.5.6 |
+| Ghidra MCP | `re-mcp-ghidra==3.0.3` **stdio** (not LaurieWired HTTP) |
+| pipx | frida-tools 14.10.4, objection 1.12.5, pwntools 4.15.0 |
+| apt | openjdk-21, radare2, apktool, binwalk, gdb, ffuf, nmap, … |
+
+IDA Pro / Burp are **not** auto-installed.
 
 ## Files in this directory
 
@@ -95,3 +118,5 @@ re-run `install.sh` and it will wire MCP + `CLAUDE.md` + the reverse-skill adapt
 - `settings.example.json` / `openclaude.json.example` — no secrets
 - `hooks/glm-auto-continue.py`
 - `statusline.py` — copied into `dist/` at build
+- `install-reverse.sh` / `verify-reverse.sh` / `reverse-versions.env` / `wire-ghidra-mcp.py`
+- `PROMPT.md` — copy-paste block for another AI to do the full install
