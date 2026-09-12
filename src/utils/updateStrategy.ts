@@ -1,5 +1,6 @@
 import type { DiagnosticInfo, InstallationType } from './doctorDiagnostic.js'
 import { getDoctorDiagnostic } from './doctorDiagnostic.js'
+import { getForkRoot } from './forkInstall.js'
 import { localInstallationExists } from './localInstaller.js'
 import { type LegacyAPIProvider, getAPIProvider } from './model/providers.js'
 import { hasNativeDistribution } from './nativeDistribution.js'
@@ -15,12 +16,14 @@ import { getPackageManager } from './nativeInstaller/packageManagers.js'
  *                        the user must update through that manager.
  *  - `native`          — update via the native installer.
  *  - `npm`             — update the npm install (`local` or `global`).
+ *  - `fork`            — git pull + bun build of the local source checkout.
  */
 export type UpdateStrategy =
   | { action: 'blocked'; reason: 'third-party-build' | 'development' }
   | { action: 'package-manager'; manager: PackageManager }
   | { action: 'native' }
   | { action: 'npm'; method: 'local' | 'global' }
+  | { action: 'fork'; root: string }
 
 /**
  * True when this build must NOT self-update: a third-party provider session
@@ -58,6 +61,7 @@ export type UpdateStrategyDeps = {
   getPackageManager: () => Promise<PackageManager>
   localInstallationExists: () => Promise<boolean>
   hasNativeDistribution: () => boolean
+  getForkRoot?: () => string | null
 }
 
 const defaultDeps: UpdateStrategyDeps = {
@@ -66,6 +70,7 @@ const defaultDeps: UpdateStrategyDeps = {
   getPackageManager,
   localInstallationExists,
   hasNativeDistribution,
+  getForkRoot,
 }
 
 /**
@@ -119,6 +124,11 @@ export async function resolveUpdateStrategy(
 ): Promise<UpdateStrategy> {
   if (deps.isThirdPartyBlocked()) {
     return { action: 'blocked', reason: 'third-party-build' }
+  }
+
+  const forkRoot = (deps.getForkRoot ?? getForkRoot)()
+  if (forkRoot) {
+    return { action: 'fork', root: forkRoot }
   }
 
   const { installationType } = await deps.getDiagnostic()

@@ -63,10 +63,11 @@ PY
 }
 recover_cwd "$@"
 
-BIN="${OPENCLAUDE_BIN:-/root/openclaude/bin/openclaude}"
+FORK_ROOT="${OPENCLAUDE_FORK_ROOT:-$HOME/openclaude}"
+BIN="${OPENCLAUDE_BIN:-$FORK_ROOT/bin/openclaude}"
 if [ ! -x "$BIN" ]; then
   echo "openclaude: binary not found at $BIN" >&2
-  echo "openclaude: expected local fork at /root/openclaude (branch preserve-reasoning-history)" >&2
+  echo "openclaude: expected fork at $FORK_ROOT (scripts/hacker/install.sh)" >&2
   exit 1
 fi
 exec "$BIN" "$@"

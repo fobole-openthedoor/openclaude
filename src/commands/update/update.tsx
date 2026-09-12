@@ -23,6 +23,7 @@ import {
 import type { PackageManager } from '../../utils/nativeInstaller/packageManagers.js'
 import { getPackageManagerUpdateGuidance } from '../../utils/packageManagerUpdateGuidance.js'
 import { shouldRemoveInstalledSymlinkForNpmUpdate } from '../../utils/autoUpdaterRouting.js'
+import { updateForkFromSource } from '../../utils/forkInstall.js'
 import { resolveUpdateStrategy } from '../../utils/updateStrategy.js'
 
 const PACKAGE_URL = MACRO.PACKAGE_URL
@@ -105,6 +106,27 @@ function Update({ onDone, force, target }: UpdateProps): React.ReactNode {
 
         if (strategy.action === 'blocked') {
           setState({ type: 'blocked', reason: strategy.reason })
+          return
+        }
+        if (strategy.action === 'fork') {
+          setState({
+            type: 'updating',
+            version: 'source',
+            via: `git (${strategy.root})`,
+          })
+          const result = await updateForkFromSource(strategy.root)
+          if (!result.ok) {
+            setState({
+              type: 'error',
+              message: result.output || 'Fork update failed.',
+            })
+            return
+          }
+          setState({
+            type: 'success',
+            version: result.commit || 'HEAD',
+            via: 'git fork',
+          })
           return
         }
         if (strategy.action === 'package-manager') {

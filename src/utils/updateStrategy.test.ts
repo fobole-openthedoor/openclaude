@@ -148,6 +148,7 @@ describe('resolveUpdateStrategy', () => {
           return true
         }),
       hasNativeDistribution: overrides.hasNativeDistribution ?? (() => true),
+      getForkRoot: overrides.getForkRoot ?? (() => null),
     }
     return { deps, calls }
   }
@@ -190,6 +191,18 @@ describe('resolveUpdateStrategy', () => {
       action: 'npm',
       method: 'global',
     })
+  })
+
+  test('routes a source-tree fork install before npm/native probes', async () => {
+    const { deps, calls } = makeDeps({
+      getForkRoot: () => '/root/openclaude',
+      installationType: 'npm-global',
+    })
+    expect(await resolveUpdateStrategy(deps)).toEqual({
+      action: 'fork',
+      root: '/root/openclaude',
+    })
+    expect(calls.diagnostic).toBe(0)
   })
 
   test('routes a global npm install without extra probes', async () => {

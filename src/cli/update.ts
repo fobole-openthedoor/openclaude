@@ -36,6 +36,7 @@ import { writeToStdout } from 'src/utils/process.js'
 import { gte } from 'src/utils/semver.js'
 import { shouldRemoveInstalledSymlinkForNpmUpdate } from 'src/utils/autoUpdaterRouting.js'
 import { getInitialSettings } from 'src/utils/settings/settings.js'
+import { updateForkFromSource, isForkInstall } from 'src/utils/forkInstall.js'
 import {
   isThirdPartyBuildBlocked,
   planUpdate,
@@ -86,6 +87,22 @@ export async function writePackageManagerUpdateGuidance(
 }
 
 export async function update() {
+  if (isForkInstall()) {
+    writeToStdout('Updating local OpenClaude fork (git + bun build)...\n')
+    const result = await updateForkFromSource()
+    if (result.output) writeToStdout(`${result.output}\n`)
+    if (result.ok) {
+      writeToStdout(
+        chalk.green(
+          `Fork updated${result.commit ? ` (${result.commit})` : ''}. Restart OpenClaude to load it.`,
+        ) + '\n',
+      )
+      await gracefulShutdown(0)
+    }
+    process.stderr.write(chalk.red('Fork update failed') + '\n')
+    await gracefulShutdown(1)
+  }
+
   // Block updates for third-party providers using upstream Anthropic builds.
   // The update mechanism downloads from the first-party distribution bucket,
   // which would silently replace the OpenClaude build with the upstream
