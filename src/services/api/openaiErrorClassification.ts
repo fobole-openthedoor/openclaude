@@ -152,9 +152,11 @@ function isContextOverflowMessage(body: string): boolean {
     lower.includes('too many tokens') ||
     lower.includes('request too large') ||
     lower.includes('context length') ||
+    lower.includes('context_length') ||
     lower.includes('maximum context') ||
     lower.includes('input length') ||
     lower.includes('payload too large') ||
+    lower.includes('function_payload_too_large') ||
     lower.includes('prompt is too long')
   )
 }
@@ -453,7 +455,7 @@ export function classifyOpenAIHttpFailure(options: {
       retryable: false,
       status: options.status,
       message: body,
-      hint: 'Provider quota or usage allotment has run out. Enable billing or switch provider.',
+      hint: 'Insufficient credits (402). This model is not covered by the current balance or plan.',
     }
   }
 
@@ -592,6 +594,20 @@ export function classifyOpenAIHttpFailure(options: {
       status: options.status,
       message: body,
       hint: 'Provider/model rejected tool-calling payload. Retry without tools or use a tool-capable model.',
+    }
+  }
+
+  // Audn (and similar inference gateways) return 504 after a hard ~300s
+  // generation ceiling. Retrying the same request usually waits another
+  // full timeout. 502/503 stay retryable as capacity blips.
+  if (options.status === 504) {
+    return {
+      source: 'http',
+      category: 'request_timeout',
+      retryable: false,
+      status: options.status,
+      message: body,
+      hint: 'The inference gateway timed out (typically 300s). The model did not finish generating; retrying the same request usually will not help.',
     }
   }
 

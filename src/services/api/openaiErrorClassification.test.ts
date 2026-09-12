@@ -462,14 +462,34 @@ test('classifies 5xx with HTML body as provider_unavailable, not malformed_provi
   expect(failure.retryable).toBe(true)
 })
 
-test('classifies 504 gateway timeout HTML as provider_unavailable', () => {
+test('classifies 504 gateway timeout as a non-retryable request_timeout', () => {
   const failure = classifyOpenAIHttpFailure({
     status: 504,
     body: '<html><head><title>504 Gateway Time-out</title></head></html>',
   })
 
-  expect(failure.category).toBe('provider_unavailable')
-  expect(failure.retryable).toBe(true)
+  expect(failure.category).toBe('request_timeout')
+  expect(failure.retryable).toBe(false)
+})
+
+test('classifies 400 context_length_exceeded as context_overflow', () => {
+  const failure = classifyOpenAIHttpFailure({
+    status: 400,
+    body: '{"error":{"code":"context_length_exceeded","message":"prompt too large"}}',
+  })
+
+  expect(failure.category).toBe('context_overflow')
+  expect(failure.retryable).toBe(false)
+})
+
+test('classifies plain-text 413 FUNCTION_PAYLOAD_TOO_LARGE as context_overflow', () => {
+  const failure = classifyOpenAIHttpFailure({
+    status: 413,
+    body: 'FUNCTION_PAYLOAD_TOO_LARGE',
+  })
+
+  expect(failure.category).toBe('context_overflow')
+  expect(failure.retryable).toBe(false)
 })
 
 test('classifies 4xx with HTML body as malformed_provider_response (unchanged)', () => {
@@ -501,7 +521,7 @@ test('classifies 402 Payment Required as quota_exhausted', () => {
 
   expect(failure.category).toBe('quota_exhausted')
   expect(failure.retryable).toBe(false)
-  expect(failure.hint).toContain('quota or usage allotment')
+  expect(failure.hint).toContain('Insufficient credits')
 })
 
 test('classifies 429 with credit messages as quota_exhausted', () => {

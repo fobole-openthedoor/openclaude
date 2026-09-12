@@ -137,7 +137,7 @@ test('OpenAI compatibility quota marker does not hide OpenCode Go message', () =
   const error = APIError.generate(
     429,
     undefined,
-    'OpenAI API error 429: {"type":"FreeUsageLimitError","message":"free usage limit reached"} [openai_category=quota_exhausted,host=opencode.ai] Hint: Provider quota or usage allotment has run out.',
+    'OpenAI API error 429: {"type":"FreeUsageLimitError","message":"free usage limit reached"} [openai_category=quota_exhausted,host=opencode.ai] Hint: Insufficient credits (402). This model is not covered by the current balance or plan.',
     new Headers({ 'x-opencode-request-url': 'https://opencode.ai/zen/go/v1/messages' }),
   )
   const text = getFirstText(getAssistantMessageFromError(error, 'glm-4.6'))

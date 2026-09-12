@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'bun:test'
-import { classifyStop } from './autoContinue.js'
+import { afterEach, describe, expect, test } from 'bun:test'
+import { autoContinueStopHook, classifyStop } from './autoContinue.js'
 
 const ENT_WRAPUP = `结论已完整写入并提交。
 
@@ -77,4 +77,25 @@ describe('classifyStop', () => {
       expect(classifyStop(text)).toBe(expectKind)
     })
   }
+})
+
+describe('OPENCLAUDE_AUTOCONTINUE', () => {
+  afterEach(() => {
+    delete process.env.OPENCLAUDE_AUTOCONTINUE
+    delete process.env.AUTO_CONTINUE
+    delete process.env.GLM_AUTO_CONTINUE
+  })
+
+  test('OPENCLAUDE_AUTOCONTINUE=0 skips the Stop block', async () => {
+    process.env.OPENCLAUDE_AUTOCONTINUE = '0'
+    const out = await autoContinueStopHook({
+      hook_event_name: 'Stop',
+      stop_hook_active: false,
+      session_id: 'test',
+      transcript_path: '/tmp/t.jsonl',
+      cwd: '/',
+      last_assistant_message: '',
+    })
+    expect(out).toEqual({})
+  })
 })

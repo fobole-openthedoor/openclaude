@@ -964,6 +964,10 @@ function shouldRetry(error: APIError, persistentRetryEnabled: boolean): boolean 
     return true
   }
 
+  // 504 is a hard gateway generation ceiling (Audn: 300s). Replay waits
+  // another full timeout and almost never succeeds.
+  if (error.status === 504) return false
+
   // Retry internal errors.
   if (error.status && error.status >= 500) return true
 

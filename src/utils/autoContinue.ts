@@ -106,10 +106,19 @@ export function reasonForKind(kind: AutoContinueKind): string | null {
   }
 }
 
-function autoContinueDisabled(): boolean {
-  const raw = process.env.AUTO_CONTINUE ?? process.env.GLM_AUTO_CONTINUE
+function envFlagOff(raw: string | undefined): boolean {
   if (raw === undefined) return false
-  return raw === '0' || raw.toLowerCase() === 'false' || raw.toLowerCase() === 'no' || isEnvTruthy(process.env.DISABLE_AUTO_CONTINUE_HOOK)
+  const v = raw.trim().toLowerCase()
+  return v === '0' || v === 'false' || v === 'no'
+}
+
+function autoContinueDisabled(): boolean {
+  // Official audncode env: OPENCLAUDE_AUTOCONTINUE=0
+  if (envFlagOff(process.env.OPENCLAUDE_AUTOCONTINUE)) return true
+  if (envFlagOff(process.env.AUTO_CONTINUE ?? process.env.GLM_AUTO_CONTINUE)) {
+    return true
+  }
+  return isEnvTruthy(process.env.DISABLE_AUTO_CONTINUE_HOOK)
 }
 
 function streakPath(sessionId: string): string {

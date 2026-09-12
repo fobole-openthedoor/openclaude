@@ -128,13 +128,13 @@ function mapOpenAICompatibilityFailureToAssistantMessage(options: {
 
     case 'quota_exhausted':
       return createAssistantAPIErrorMessage({
-        content: `${API_ERROR_MESSAGE_PREFIX}: Provider quota or usage allotment has run out. Please enable billing for your provider or switch provider via /provider.`,
+        content: `${API_ERROR_MESSAGE_PREFIX}: Insufficient credits (402). This model is not covered by the current balance or plan. Switch model via ${switchCmd}.`,
         error: 'rate_limit',
       })
 
     case 'request_timeout':
       return createAssistantAPIErrorMessage({
-        content: `${API_ERROR_MESSAGE_PREFIX}: Provider request timed out. Local models may be loading or overloaded; retry shortly or increase API_TIMEOUT_MS.`,
+        content: `${API_ERROR_MESSAGE_PREFIX}: Provider timed out (gateway ceiling is typically 300s). Retrying the same request usually will not help.`,
         error: 'unknown',
       })
 

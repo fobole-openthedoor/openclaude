@@ -378,7 +378,7 @@ describe('OpenAI-compatible retry classification', () => {
     const error = APIError.generate(
       402,
       undefined,
-      'OpenAI API error 402: Payment Required [openai_category=quota_exhausted,host=opencode.ai] Hint: Provider quota or usage allotment has run out.',
+      'OpenAI API error 402: Payment Required [openai_category=quota_exhausted,host=opencode.ai] Hint: Insufficient credits (402). This model is not covered by the current balance or plan.',
       new Headers(),
     )
     let attempts = 0

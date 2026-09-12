@@ -29,6 +29,11 @@ import { parseCustomHeadersEnv } from '../utils/providerCustomHeaders.js'
 import { firstUsableCredential } from '../services/api/credentialPool.js'
 import { ZAI_GLM_OPENAI_SHIM } from './transport/zaiGlmShim.js'
 import {
+  getAudnPlatformLimits,
+  isAudnReasoningModel,
+  AUDN_REASONING_OPENAI_SHIM,
+} from './audnPlatform.js'
+import {
   getCachedXaiCredentials,
   getXaiDiscoveryCacheIdentity,
 } from '../utils/xaiCredentials.js'
@@ -229,6 +234,11 @@ function inferRemoteModelOpenAIShimConfig(
       maxTokensField: 'max_tokens',
       removeBodyFields: ['store'],
     }
+  }
+
+  // platform.audn.ai roster ids (also when proxied as audn/necromicon etc.)
+  if (isAudnReasoningModel(normalizedModel)) {
+    return { ...AUDN_REASONING_OPENAI_SHIM }
   }
 
   // Only infer the Z.AI GLM shim for routes without a catalog entry
@@ -519,6 +529,7 @@ export function resolveModelRuntimeLimits(options: {
     (inferredModelDescriptor?.runtimeMetadataScope === 'catalog'
       ? null
       : inferredModelDescriptor)
+  const audnLimits = getAudnPlatformLimits(modelApiName)
   const externalContextWindow = getOpenAIContextWindowMatches(
     modelApiName,
     runtimeEnv,
@@ -543,14 +554,16 @@ export function resolveModelRuntimeLimits(options: {
       cachedCatalogEntry?.contextWindow ??
       externalContextWindow.prefix ??
       externalContextWindow.settings ??
-      modelDescriptor?.contextWindow,
+      modelDescriptor?.contextWindow ??
+      audnLimits?.contextWindow,
     maxOutputTokens:
       externalMaxOutputTokens.exact ??
       catalogEntry?.maxOutputTokens ??
       cachedCatalogEntry?.maxOutputTokens ??
       externalMaxOutputTokens.prefix ??
       externalMaxOutputTokens.settings ??
-      modelDescriptor?.maxOutputTokens,
+      modelDescriptor?.maxOutputTokens ??
+      audnLimits?.maxOutputTokens,
   }
 }
 
