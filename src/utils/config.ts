@@ -718,7 +718,7 @@ function createDefaultGlobalConfig(): GlobalConfig {
     preferredNotifChannel: 'auto',
     verbose: false,
     editorMode: 'normal',
-    autoCompactEnabled: true,
+    autoCompactEnabled: false,
     contextCollapseEnabled: false,
     toolHistoryCompressionEnabled: true,
     showTurnDuration: true,

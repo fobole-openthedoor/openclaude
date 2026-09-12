@@ -25,8 +25,8 @@ afterEach(() => {
 test('invalid hard cap override falls back to the default safety cap', () => {
   process.env.OPENCLAUDE_MAX_ACTIVE_MESSAGES_HARD_CAP = '100O'
 
-  expect(getMaxActiveMessagesHardCap()).toBe(1000)
-  expect(isAboveMaxActiveMessagesLimit(1001)).toBe(true)
+  expect(getMaxActiveMessagesHardCap()).toBe(0)
+  expect(isAboveMaxActiveMessagesLimit(1001)).toBe(false)
 })
 
 test('explicit zero hard cap disables only the hard cap', () => {

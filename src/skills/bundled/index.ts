@@ -8,6 +8,7 @@ import { registerLoopSkill } from './loop.js'
 import { registerPdfSkill } from './pdf.js'
 import { registerSimplifySkill } from './simplify.js'
 import { registerUpdateConfigSkill } from './updateConfig.js'
+import { registerReverseSkill } from './reverseSkill.js'
 
 /**
  * Initialize all bundled skills.
@@ -20,6 +21,7 @@ import { registerUpdateConfigSkill } from './updateConfig.js'
  */
 export function initBundledSkills(): void {
   registerUpdateConfigSkill()
+  registerReverseSkill()
   registerKeybindingsSkill()
   registerDebugSkill()
   registerSimplifySkill()

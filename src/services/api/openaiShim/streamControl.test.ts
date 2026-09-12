@@ -165,7 +165,7 @@ test('readWithIdleTimeout contains a throwing custom error factory', async () =>
 })
 
 test('stream idle timeout parser validates and bounds overrides', () => {
-  expect(getStreamIdleTimeoutMs()).toBe(90_000)
+  expect(getStreamIdleTimeoutMs()).toBe(1_800_000)
   process.env.CLAUDE_STREAM_IDLE_TIMEOUT_MS = '25'
   expect(getStreamIdleTimeoutMs()).toBe(25)
   process.env.CLAUDE_STREAM_IDLE_TIMEOUT_MS = ' 25 '
@@ -175,7 +175,7 @@ test('stream idle timeout parser validates and bounds overrides', () => {
 
   for (const invalid of ['9007199254740993', '25ms', '0', '-5']) {
     process.env.CLAUDE_STREAM_IDLE_TIMEOUT_MS = invalid
-    expect(getStreamIdleTimeoutMs()).toBe(90_000)
+    expect(getStreamIdleTimeoutMs()).toBe(1_800_000)
   }
 })
 

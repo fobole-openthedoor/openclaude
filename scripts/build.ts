@@ -8,7 +8,7 @@
  * - src/ path aliases
  */
 
-import { existsSync, readFileSync } from 'fs'
+import { copyFileSync, existsSync, readFileSync } from 'fs'
 import { createRequire } from 'module'
 import { dirname, join } from 'path'
 import { noTelemetryPlugin } from './no-telemetry-plugin'
@@ -526,6 +526,8 @@ if (!result.success) {
   process.exitCode = 1
 } else {
   console.log(`✓ Built openclaude v${version} → dist/cli.mjs`)
+  copyFileSync('scripts/hacker/statusline.py', 'dist/statusline.py')
+  console.log('✓ Bundled statusline.py → dist/statusline.py')
 }
 
 // ── SDK Bundle Build ──────────────────────────────────────────────────────

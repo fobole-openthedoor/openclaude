@@ -14,7 +14,6 @@ import {
   readNodeExecutableVersion,
   serializeSafeEnvSummary,
 } from './system-check.ts'
-import { DEFAULT_MAX_ACTIVE_MESSAGES_HARD_CAP } from '../src/utils/maxActiveMessages.ts'
 import { resetSettingsCache } from '../src/utils/settings/settingsCache.ts'
 
 const ENV_KEYS = [
@@ -670,7 +669,7 @@ describe('system-check memory guard diagnostics', () => {
     expect(results).toContainEqual({
       ok: true,
       label: 'Auto-compact guard',
-      detail: `Enabled; message-count threshold off; hard cap ${DEFAULT_MAX_ACTIVE_MESSAGES_HARD_CAP}.`,
+      detail: 'Enabled; message-count threshold off; hard cap disabled.',
     })
   })
 
@@ -684,12 +683,13 @@ describe('system-check memory guard diagnostics', () => {
     expect(results).toContainEqual({
       ok: true,
       label: 'Auto-compact guard',
-      detail: `Enabled; message-count threshold 200; hard cap ${DEFAULT_MAX_ACTIVE_MESSAGES_HARD_CAP}.`,
+      detail: 'Enabled; message-count threshold 200; hard cap disabled.',
     })
     expect(results).toContainEqual({
-      ok: true,
+      ok: false,
       label: 'Active-message hard cap',
-      detail: `Active at ${DEFAULT_MAX_ACTIVE_MESSAGES_HARD_CAP} messages (default; malformed overrides fall back to ${DEFAULT_MAX_ACTIVE_MESSAGES_HARD_CAP}).`,
+      detail:
+        'Disabled by OPENCLAUDE_MAX_ACTIVE_MESSAGES_HARD_CAP=0; long sessions can grow without the active-message safety cap.',
     })
     expect(results.find(result => result.label === 'Memory pressure guard'))
       .toMatchObject({ ok: true })
@@ -706,7 +706,7 @@ describe('system-check memory guard diagnostics', () => {
       expect(results).toContainEqual({
         ok: true,
         label: 'Auto-compact guard',
-        detail: `Enabled; message-count threshold 500; hard cap ${DEFAULT_MAX_ACTIVE_MESSAGES_HARD_CAP}.`,
+        detail: 'Enabled; message-count threshold 500; hard cap disabled.',
       })
     }
   })
@@ -721,7 +721,7 @@ describe('system-check memory guard diagnostics', () => {
     expect(results).toContainEqual({
       ok: true,
       label: 'Auto-compact guard',
-      detail: `Enabled; message-count threshold 100; hard cap ${DEFAULT_MAX_ACTIVE_MESSAGES_HARD_CAP}.`,
+      detail: 'Enabled; message-count threshold 100; hard cap disabled.',
     })
   })
 
@@ -735,9 +735,10 @@ describe('system-check memory guard diagnostics', () => {
     })
 
     expect(results).toContainEqual({
-      ok: true,
+      ok: false,
       label: 'Active-message hard cap',
-      detail: `Active at ${DEFAULT_MAX_ACTIVE_MESSAGES_HARD_CAP} messages; malformed override fell back to ${DEFAULT_MAX_ACTIVE_MESSAGES_HARD_CAP}.`,
+      detail:
+        'Disabled by OPENCLAUDE_MAX_ACTIVE_MESSAGES_HARD_CAP=0; long sessions can grow without the active-message safety cap.',
     })
   })
 

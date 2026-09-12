@@ -1,4 +1,4 @@
-export const DEFAULT_MAX_ACTIVE_MESSAGES_HARD_CAP = 1000
+export const DEFAULT_MAX_ACTIVE_MESSAGES_HARD_CAP = 0
 
 type MaxActiveMessagesEnv = Record<string, string | undefined>
 

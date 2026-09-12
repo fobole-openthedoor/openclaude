@@ -27,11 +27,12 @@ import { getCurrentSessionTitle } from '../utils/sessionStorage.js';
 import { doesMostRecentAssistantMessageExceed200k, getCurrentUsage, getUnreportedSessionUsage, type SessionUsage } from '../utils/tokens.js';
 import { getCurrentWorktreeSession } from '../utils/worktree.js';
 import { isVimModeEnabled } from './PromptInput/utils.js';
+import { getBundledStatusLineCommand } from '../utils/bundledStatusLine.js';
 export function statusLineShouldDisplay(settings: ReadonlySettings): boolean {
   // Assistant mode: statusline fields (model, permission mode, cwd) reflect the
   // REPL/daemon process, not what the agent child is actually running. Hide it.
   if (feature('KAIROS') && getKairosActive()) return false;
-  return settings?.statusLine !== undefined;
+  return settings?.statusLine !== undefined || getBundledStatusLineCommand() !== null;
 }
 
 export function resolveStatusLineTokenTotals(
@@ -268,7 +269,7 @@ function StatusLineInner({
   // True when the next invocation should log its result (first run or after settings reload)
   const logNextResultRef = useRef(true);
   const hasRunRef = useRef(false);
-  const statusLineCommand = settings?.statusLine?.command;
+  const statusLineCommand = settings?.statusLine?.command ?? getBundledStatusLineCommand() ?? undefined;
   const previousStatusLineCommandRef = useRef(statusLineCommand);
 
   // Stable update function — reads latest values from refs
