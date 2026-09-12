@@ -291,6 +291,42 @@ test('strips Anthropic attribution header block from responses-API instructions 
   ])).toBe('Follow these instructions.')
 })
 
+test('preserveReasoningContent keeps thinking-only assistant history as reasoning_content', () => {
+  const messages = convertMessages([
+    { role: 'user', content: 'Initial' },
+    { role: 'assistant', content: [{ type: 'thinking', thinking: 'I already decided to squash.' }] },
+    { role: 'user', content: 'do it' },
+  ], '', { preserveReasoningContent: true })
+
+  expect(messages.map(message => message.role)).toEqual(['user', 'assistant', 'user'])
+  expect(messages[1]).toMatchObject({
+    role: 'assistant',
+    reasoning_content: 'I already decided to squash.',
+  })
+})
+
+test('preserveReasoningContent coalesces split thinking + tool_use assistant rows', () => {
+  const messages = convertMessages([
+    { role: 'user', content: 'squash to one commit' },
+    { role: 'assistant', content: [{ type: 'thinking', thinking: 'Use an orphan branch.' }] },
+    {
+      role: 'assistant',
+      content: [{ type: 'tool_use', id: 'call_1', name: 'Bash', input: { command: 'git log' } }],
+    },
+    {
+      role: 'user',
+      content: [{ type: 'tool_result', tool_use_id: 'call_1', content: 'four commits' }],
+    },
+  ], '', { preserveReasoningContent: true, reasoningContentFallback: '' })
+
+  expect(messages.map(message => message.role)).toEqual(['user', 'assistant', 'tool'])
+  expect(messages[1]?.reasoning_content).toBe('Use an orphan branch.')
+  expect(messages[1]?.tool_calls?.[0]).toMatchObject({
+    id: 'call_1',
+    function: { name: 'Bash' },
+  })
+})
+
 test('DeepSeek: redacted_thinking block preserves continuity with reasoning_content: ""', () => {
   const messages = convertMessages([{
     role: 'assistant',

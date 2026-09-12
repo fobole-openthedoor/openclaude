@@ -261,7 +261,16 @@ export function convertMessages(
       mappedToolCalls.push(toolCall)
     }
     if (mappedToolCalls.length) assistantMsg.tool_calls = mappedToolCalls
-    if (assistantMsg.content || assistantMsg.tool_calls?.length) result.push(assistantMsg)
+    // OpenClaude records thinking and tool_use as separate assistant messages
+    // (same message.id, one block each). Without this, thinking-only rows have
+    // empty content and no tool_calls, so historical reasoning_content is dropped
+    // even when preserveReasoningContent is on.
+    const hasReasoning =
+      typeof assistantMsg.reasoning_content === 'string' &&
+      assistantMsg.reasoning_content.trim().length > 0
+    if (assistantMsg.content || assistantMsg.tool_calls?.length || hasReasoning) {
+      result.push(assistantMsg)
+    }
   }
 
   const coalesced: ConvertedOpenAIMessage[] = []
@@ -285,6 +294,11 @@ export function convertMessages(
       last.content = [...asParts(previous), ...asParts(current)]
     }
     if (msg.tool_calls?.length) last.tool_calls = [...(last.tool_calls ?? []), ...msg.tool_calls]
+    const incomingReasoning =
+      typeof msg.reasoning_content === 'string' ? msg.reasoning_content.trim() : ''
+    const existingReasoning =
+      typeof last.reasoning_content === 'string' ? last.reasoning_content.trim() : ''
+    if (incomingReasoning && !existingReasoning) last.reasoning_content = msg.reasoning_content
   }
   return coalesced
 }
