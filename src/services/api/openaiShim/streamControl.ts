@@ -5,7 +5,7 @@ import {
   traceInterruptionEvent,
 } from '../../../utils/interruptionTrace.js'
 
-const DEFAULT_STREAM_IDLE_TIMEOUT_MS = 1_800_000
+const DEFAULT_STREAM_IDLE_TIMEOUT_MS = 300_000
 const MAX_STREAM_IDLE_TIMEOUT_MS = 2_147_483_647
 
 export class StreamIdleTimeoutError extends Error {
