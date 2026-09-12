@@ -73,6 +73,7 @@ import {
   createMicrocompactBoundaryMessage,
 } from './utils/messages.js'
 import { analyzeContinuationIntent } from './utils/continuation.js'
+import { isAutoContinueEnabled } from './utils/autoContinue.js'
 import { generateToolUseSummary } from './services/toolUseSummary/toolUseSummaryGenerator.js'
 import { prependUserContext, appendSystemContext } from './utils/api.js'
 import {
@@ -2601,9 +2602,16 @@ async function* queryLoop(
       // (e.g., "so now I have to do it", "let me now...", "I'll need to...")
       // but returned no tool calls. This prevents premature task completion.
       //
+      // Fork: the Stop-hook auto-continue classifier owns this job (including
+      // truncation). Skip the English nudge so a turn cannot be continued twice.
+      // OPENCLAUDE_AUTOCONTINUE=0 disables the hook; do not fall back to the
+      // nudge — that env means "stop at end of turn".
+      //
       // Guard: capped at MAX_CONTINUATION_NUDGES to prevent infinite loops
       // when the model keeps matching signals without ever calling tools.
       if (
+        !isAutoContinueEnabled() &&
+        process.env.OPENCLAUDE_BUILTIN_CONTINUATION_NUDGE === '1' &&
         assistantMessages.length > 0 &&
         !agentStepLimit?.summaryRequested &&
         turnCount < (maxTurns ?? Infinity) &&

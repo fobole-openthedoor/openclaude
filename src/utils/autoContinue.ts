@@ -5,7 +5,7 @@ import type { HookInput, HookJSONOutput } from '../entrypoints/agentSdkTypes.js'
 import { isEnvTruthy } from './envUtils.js'
 import type { HookCallback } from '../types/hooks.js'
 
-export type AutoContinueKind = 'allow' | 'think' | 'announce' | 'short'
+export type AutoContinueKind = 'allow' | 'think' | 'announce' | 'short' | 'trunc'
 
 const MAX_STREAK = Number.parseInt(process.env.AUTO_CONTINUE_MAX ?? process.env.GLM_AUTO_CONTINUE_MAX ?? '12', 10) || 12
 const SHORT_LIMIT = Number.parseInt(process.env.AUTO_CONTINUE_SHORT ?? process.env.GLM_AUTO_CONTINUE_SHORT ?? '800', 10) || 800
@@ -52,10 +52,15 @@ export const SHORT_NOTE_REASON =
   'That is not a finished turn. Keep going on the same task: ' +
   'call the next tool now. Do not repeat the finding.'
 
+export const TRUNC_REASON =
+  'Your last message looks cut off (unclosed code/brackets or a trailing connector). ' +
+  'Continue from where you stopped and call the next tool if there is one.'
+
 const KIND_LABEL: Record<Exclude<AutoContinueKind, 'allow'>, string> = {
   think: '想完没调工具',
   announce: '还有下一步没调工具',
   short: '短结论没调工具',
+  trunc: '输出像被截断',
 }
 
 function afterClose(text: string): string {
@@ -75,12 +80,31 @@ export function isStructuredClose(text: string): boolean {
   return HANDOFF_FLAVOR.test(text)
 }
 
+export function looksTruncated(text: string): boolean {
+  if ((text.match(/```/g) || []).length % 2 !== 0) return true
+  for (const [open, close] of [
+    ['(', ')'],
+    ['[', ']'],
+    ['{', '}'],
+  ] as const) {
+    let depth = 0
+    for (const ch of text) {
+      if (ch === open) depth++
+      else if (ch === close) depth--
+    }
+    if (depth > 0) return true
+  }
+  return /(?:[,;:：]|```[a-z]*)\s*$/i.test(text)
+}
+
 export function classifyStop(lastText: string): AutoContinueKind {
   const text = lastText.trim()
   if (text.startsWith('No response requested') || text.includes('automatic compaction')) {
     return 'allow'
   }
   if (!text) return 'think'
+  // Structural cut-off wins over "done" / handoff, matching the old query-loop nudge.
+  if (looksTruncated(text)) return 'trunc'
   if (USER_QUESTION.test(text)) return 'allow'
   if (isClosedHandoff(text)) {
     return PENDING_ACTION.test(afterClose(text)) ? 'announce' : 'allow'
@@ -101,9 +125,15 @@ export function reasonForKind(kind: AutoContinueKind): string | null {
       return ANNOUNCE_REASON
     case 'short':
       return SHORT_NOTE_REASON
+    case 'trunc':
+      return TRUNC_REASON
     default:
       return null
   }
+}
+
+export function isAutoContinueEnabled(): boolean {
+  return !autoContinueDisabled()
 }
 
 function envFlagOff(raw: string | undefined): boolean {
@@ -113,7 +143,7 @@ function envFlagOff(raw: string | undefined): boolean {
 }
 
 function autoContinueDisabled(): boolean {
-  // Official audncode env: OPENCLAUDE_AUTOCONTINUE=0
+  // Official audncode env: OPENCLAUDE_AUTOCONTINUE=0 turns ALL auto-continue off.
   if (envFlagOff(process.env.OPENCLAUDE_AUTOCONTINUE)) return true
   if (envFlagOff(process.env.AUTO_CONTINUE ?? process.env.GLM_AUTO_CONTINUE)) {
     return true

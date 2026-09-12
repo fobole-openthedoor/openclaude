@@ -70,6 +70,9 @@ describe('classifyStop', () => {
       'allow',
     ],
     ['next-inventory', '下一步：待验证清单', 'allow'],
+    ['trunc-fence', 'Here is the code:\n```typescript\nfunction test() {', 'trunc'],
+    ['trunc-paren', 'Please inspect (src/query.ts', 'trunc'],
+    ['trunc-colon', 'The plan is as follows:', 'trunc'],
   ]
 
   for (const [name, text, expectKind] of cases) {
