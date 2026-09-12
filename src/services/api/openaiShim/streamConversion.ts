@@ -6,6 +6,7 @@ import {
   classifyOpenAIHttpFailure,
 } from '../openaiErrorClassification.js'
 import { createThinkTagFilter, stripThinkTags } from '../thinkTagSanitizer.js'
+import { createDegenerationWatch } from '../../../utils/outputDegeneration.js'
 import {
   hasToolFieldMapping,
   normalizeToolArguments,
@@ -154,6 +155,7 @@ export async function* openaiStreamToAnthropic(
   let hasEmittedThinkingStart = false
   let hasClosedThinking = false
   const thinkFilter = createThinkTagFilter()
+  const degenerationWatch = createDegenerationWatch()
   let lastStopReason: 'tool_use' | 'max_tokens' | 'end_turn' | null = null
   let hasEmittedFinalUsage = false
   let protocolComplete = false
@@ -350,6 +352,7 @@ export async function* openaiStreamToAnthropic(
         index: contentBlockIndex,
         delta: { type: 'text_delta', text: visible },
       }
+      degenerationWatch.push(visible)
     }
     processStreamChunk(streamState, text)
   }
@@ -576,6 +579,7 @@ export async function* openaiStreamToAnthropic(
             index: contentBlockIndex,
             delta: { type: 'thinking_delta', thinking: delta.reasoning_content },
           }
+          degenerationWatch.push(delta.reasoning_content)
         }
 
         // Text content — use != null to distinguish absent field from empty string,

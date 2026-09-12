@@ -74,6 +74,10 @@ import {
 } from './utils/messages.js'
 import { analyzeContinuationIntent } from './utils/continuation.js'
 import { isAutoContinueEnabled } from './utils/autoContinue.js'
+import {
+  DEGENERATION_RETRY_PROMPT,
+  isOutputDegenerationError,
+} from './utils/outputDegeneration.js'
 import { generateToolUseSummary } from './services/toolUseSummary/toolUseSummaryGenerator.js'
 import { prependUserContext, appendSystemContext } from './utils/api.js'
 import {
@@ -305,6 +309,7 @@ function* yieldMissingToolResultBlocks(
  */
 const MAX_OUTPUT_TOKENS_RECOVERY_LIMIT = 3
 const MAX_CONTINUATION_NUDGES = 20
+const MAX_DEGENERATION_RETRIES = 3
 
 type AgentStepLimitConfig = {
   maxSteps: number
@@ -1514,6 +1519,7 @@ async function* queryLoop(
     // moving it inside would reset it every attempt and defeat the once-only
     // guarantee.
     let routedFallbackUsed = false
+    let degenerationRetryCount = 0
 
     queryCheckpoint('query_api_loop_start')
     try {
@@ -1970,6 +1976,46 @@ async function* queryLoop(
 
             yield createSystemMessage(
               `Smart routing: retrying on ${renderModelName(strongModel)} after the simple model failed`,
+              'warning',
+            )
+            continue
+          }
+          if (
+            isOutputDegenerationError(innerError) &&
+            degenerationRetryCount < MAX_DEGENERATION_RETRIES &&
+            !toolUseContext.abortController.signal.aborted
+          ) {
+            degenerationRetryCount++
+            attemptWithFallback = true
+            yield* yieldMissingToolResultBlocks(
+              assistantMessages,
+              'Output degeneration retry',
+            )
+            assistantMessages.length = 0
+            toolResults.length = 0
+            toolUseBlocks.length = 0
+            needsFollowUp = false
+            if (streamingToolExecutor) {
+              streamingToolExecutor.discard()
+              streamingToolExecutor = new StreamingToolExecutor(
+                toolUseContext.options.tools,
+                canUseTool,
+                toolUseContext,
+              )
+            }
+            messagesForQuery = [
+              ...messagesForQuery,
+              createUserMessage({
+                content: DEGENERATION_RETRY_PROMPT,
+                isMeta: true,
+              }),
+            ]
+            logForDebugging(
+              `Output degeneration retry ${degenerationRetryCount}/${MAX_DEGENERATION_RETRIES}: ${innerError.message}`,
+              { level: 'warn' },
+            )
+            yield createSystemMessage(
+              `Output collapsed into word salad (${innerError.kind}). Retrying ${degenerationRetryCount}/${MAX_DEGENERATION_RETRIES} without that dump.`,
               'warning',
             )
             continue
