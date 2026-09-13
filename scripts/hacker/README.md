@@ -1,6 +1,8 @@
 # OpenClaude replica (this fork)
 
-This directory is the install kit for **this** OpenClaude fork: Gitlawb v0.30.0 plus historical reasoning replay, live thinking, beefsms OpenAI-compat provider, and the local launchers.
+**人先看仓库根目录 [INSTALL.md](../../INSTALL.md)。给 AI 的提示词在根目录 [PROMPT.md](../../PROMPT.md)。**
+
+This directory is the install kit behind those two files: Gitlawb v0.30.0 plus historical reasoning replay, live thinking, beefsms OpenAI-compat provider, and the local launchers.
 
 It is **not** in the safeline `hacker/hacker` repo. Clone **`hacker/openclaude`**.
 

@@ -1,3 +1,18 @@
+> **这是 fork，不是上游。** 不要 `npm i -g @gitlawb/openclaude`，不要用 `main`。
+>
+> **安装：** 看根目录 **[INSTALL.md](INSTALL.md)**（三条命令 + 填 key）。
+> **丢给 AI 装：** 根目录 **[PROMPT.md](PROMPT.md)**，把里面那一段原样贴给任意能跑终端的 AI。
+>
+> ```sh
+> curl -fsSL https://raw.githubusercontent.com/fobole-openthedoor/openclaude/preserve-reasoning-history/scripts/hacker/bootstrap.sh | sh
+> ~/openclaude/scripts/hacker/install-reverse.sh
+> # 编辑 ~/.config/openclaude/env ，填 OPENAI_API_KEY
+> ```
+>
+> 供应商已固定为 beefsms：`http://openai.beefsms.com:38888/v1`。脚本和版本钉死在 `scripts/hacker/`。
+
+---
+
 <div align="center">
   <img src="docs/assets/openclaude-wordmark.png" alt="OpenClaude — Open terminal for any LLM" width="830">
 
