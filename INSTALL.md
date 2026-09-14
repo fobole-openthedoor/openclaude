@@ -13,10 +13,13 @@ curl -fsSL https://raw.githubusercontent.com/fobole-openthedoor/openclaude/prese
 ~/openclaude/scripts/hacker/install-reverse.sh
 ```
 
+`install.sh` 会装三套工作域：逆向 `/reverse-skill`、破解 `/crack`、渗透（Claude-Red 的 `offensive-*` skills）。`CLAUDE.md` 负责先分域再调 skill。Re-run `~/openclaude/scripts/hacker/install-claude-red.sh` if the pentest pack was skipped.
+
 然后编辑 `~/.config/openclaude/env`，把 `OPENAI_API_KEY` 换成自己的 beefsms key。可选 `BRAVE_API_KEY`。
 
 ```sh
 ~/openclaude/scripts/hacker/verify-reverse.sh
+~/openclaude/scripts/hacker/verify-claude-red.sh
 openclaude
 ```
 

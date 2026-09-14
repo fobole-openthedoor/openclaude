@@ -1,10 +1,26 @@
 # OpenClaude user memory
 
-Reverse-engineering pack lives at `__REVERSE_SKILL_ROOT__` (`REVERSE_SKILL_ROOT`). Use the bundled `/reverse-skill` skill; it routes to one PRIMARY module.
+## Work mode: 逆向 / 破解 / 渗透
 
-- Rules: `__REVERSE_SKILL_ROOT__/RULES.md`
-- Tool index: `__REVERSE_SKILL_ROOT__/skills/tool-index.md`
-- Ghidra: `__GHIDRA_HOME__` (`GHIDRA_INSTALL_DIR`, `analyzeHeadless`)
+On **every** user task, pick one domain first, then invoke the matching skill immediately. Do not start acting until a skill is loaded.
+
+If the domain is unclear, run `python3 __OPENCLAUDE_FORK_ROOT__/scripts/hacker/skills/domain-route.py --hint "<user task>"` and follow `NEXT`.
+
+| Domain | User is talking about | Invoke |
+| --- | --- | --- |
+| 逆向 reverse | 反编译, Ghidra, IDA, Frida, APK/SO/ELF/PE, 样本怎么工作 | `reverse-skill` |
+| 破解 crack | 脱壳, 去校验, 补丁, 激活/授权, 加壳, OLLVM, crackme, keygen | `crack` |
+| 渗透 pentest | 打站, SQLi, XSS, 内网, AD, 云, 口令, 打点, 绕过 WAF | matching `offensive-*` skill |
+
+Do not mix packs on the first turn. Reverse a binary then pentest the service → 逆向/破解 first, 渗透 second. 「破解网站」 is pentest; 「破解软件/授权/壳」 is crack.
+
+Reverse pack: `__REVERSE_SKILL_ROOT__` (`REVERSE_SKILL_ROOT`). Ghidra: `__GHIDRA_HOME__` (`analyzeHeadless`).
+
+## Claude-Red skills
+
+The Claude-Red pack is installed as normal OpenClaude skills (`offensive-sqli`, `offensive-jwt`, `offensive-k8s-attacks`, …). Pack root: `__CLAUDE_RED_ROOT__` (`CLAUDE_RED_ROOT`).
+
+When the domain is **渗透**, invoke that skill with the Skill tool immediately. `/claude-red` is only a catalog. 逆向 → `/reverse-skill`. 破解 → `/crack`.
 
 ## Web search
 

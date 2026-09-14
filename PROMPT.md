@@ -21,6 +21,8 @@
 - 供应商固定：`OPENAI_BASE_URL=http://openai.beefsms.com:38888/v1`，模型 `happy/kimi-k3` / `happy/glm-5.3` / `happy/qwen-3.8-fast`。
 - Key 只存在 `~/.config/openclaude/env`，由用户自己填。仓库里只有占位符。
 - 逆向：`$HOME/tools/reverse-skill`、`$HOME/tools/ghidra`（12.1.3 PUBLIC）、jadx 1.5.6、`re-mcp-ghidra` stdio MCP。不要装 LaurieWired GhidraMCP，不要改用 HTTP :8765。
+- 工作域三套：逆向 `/reverse-skill`（`$HOME/tools/reverse-skill`）、破解 `/crack`（同一套 reverse pack，脱壳/去校验/补丁）、渗透 Claude-Red `offensive-*`。`CLAUDE.md` 必须有 `Work mode: 逆向 / 破解 / 渗透`，任务一开始先分域再调 Skill tool。
+- 进攻技能包：`$HOME/tools/claude-red`（https://github.com/SnailSploit/Claude-Red）。每个 `Skills/*/*/SKILL.md` **symlink 进** `$HOME/.audncode-platform/skills/`。`SLASH_COMMAND_TOOL_CHAR_BUDGET=28000`。分域脚本：`scripts/hacker/skills/domain-route.py`。
 
 ## 步骤
 
@@ -28,7 +30,7 @@
 2. 若还没有 checkout：
    `git clone -b preserve-reasoning-history https://github.com/fobole-openthedoor/openclaude.git $HOME/openclaude`
    有 Forgejo SSH 则优先 `git@forgejo:hacker/openclaude.git`。
-3. 跑 `$HOME/openclaude/scripts/hacker/install.sh`。
+3. 跑 `$HOME/openclaude/scripts/hacker/install.sh`（里面会 clone Claude-Red 到 `$HOME/tools/claude-red`）。若跳过了，再跑 `install-claude-red.sh`。
 4. 跑 `$HOME/openclaude/scripts/hacker/install-reverse.sh`。
    Ghidra zip 约 570MB，sha256 必须是 `93a5d11a9ad510622acaaf908c556a7b9b764d338e78a7567f3689bf5081fd54`。磁盘不够或用户明确说跳过时才加 `--skip-ghidra`。
    版本钉死在 `scripts/hacker/reverse-versions.env`，不要自作主张升版本。
@@ -41,7 +43,7 @@
    - 用 `scripts/hacker/wire-ghidra-mcp.py` 把 ghidra MCP 写进 `$HOME/.audncode-platform/.openclaude.json`（stdio，`re-mcp-ghidra stdio`，env 里 GHIDRA_INSTALL_DIR / GHIDRA_HOME / JAVA_HOME）。没有这个 py 就手工 merge，不要碰已有 apiKey 字段。
 6. 编辑 `$HOME/.config/openclaude/env`：把 `OPENAI_API_KEY` 从 `PASTE_YOUR_BEEFSMS_KEY_HERE` 换成用户的 beefsms key。没有 key 就停在这一步并告诉用户去填，不要编造 key。可选 `BRAVE_API_KEY`。
 7. 把 `$HOME/.local/bin`、`$HOME/tools/jadx/bin`、`$HOME/tools/ghidra/support` 放进 PATH（launch.sh 会 source env；env 里没有 PATH 就补上）。
-8. 跑 `$HOME/openclaude/scripts/hacker/verify-reverse.sh`。失败就修，再跑直到通过或只剩「用户还没填 key」。
+8. 跑 `$HOME/openclaude/scripts/hacker/verify-reverse.sh` 和 `verify-claude-red.sh`。失败就修，再跑直到通过或只剩「用户还没填 key」。
 9. 不要安装 IDA Pro / Burp 正版替代品。不要提交 `~/.config/openclaude/env` 或 `.openclaude.json`。
 
 ## 验收表（按这个格式汇报）
@@ -51,8 +53,9 @@
 - OPENAI_API_KEY 是否已填（只回答 是/否）
 - java 版本、Ghidra analyzeHeadless、jadx、r2、re-mcp-ghidra
 - reverse-skill 路径、tool-index.md 是否生成
+- CLAUDE.md 是否有 Work mode 三域；`/crack` adapter；`domain-route.py --hint 脱壳` → crack；offensive-sqli 是否 symlink；`SLASH_COMMAND_TOOL_CHAR_BUDGET`
 - mcpServers.ghidra 是否 stdio
-- verify-reverse.sh 退出码
+- verify-reverse.sh / verify-claude-red.sh 退出码
 ```
 
 复制结束

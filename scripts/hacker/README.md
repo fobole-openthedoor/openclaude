@@ -64,6 +64,8 @@ If `/usr/local/bin` is not writable, the launcher lands in `~/.local/bin`. Put t
 | `~/.audncode-platform/settings.json` | model list, 1M context, bypass permissions, statusline, GLM Stop hook |
 | `~/.audncode-platform/.openclaude.json` | beefsms profile **without** an API key (env supplies it) |
 | `~/.audncode-platform/hooks/glm-auto-continue.py` | GLM 5.3 auto-continue Stop hook |
+| `$HOME/tools/claude-red` | [Claude-Red](https://github.com/SnailSploit/Claude-Red) pack (cloned by `install.sh`) |
+| `~/.audncode-platform/skills/offensive-*` | Each Claude-Red `SKILL.md` linked in as a normal OpenClaude skill |
 
 Update later:
 
@@ -110,6 +112,27 @@ What that installs (matching the reference host):
 
 IDA Pro / Burp are **not** auto-installed.
 
+## Work mode: 逆向 / 破解 / 渗透
+
+`CLAUDE.md` triages every task into one domain, then the matching skill auto-invokes:
+
+| Domain | Skill | Pack |
+| --- | --- | --- |
+| 逆向 | `/reverse-skill` | `$HOME/tools/reverse-skill` |
+| 破解 | `/crack` | same reverse pack, crack workflow (脱壳/去校验/补丁) |
+| 渗透 | `offensive-sqli` 等 | [Claude-Red](https://github.com/SnailSploit/Claude-Red) |
+
+Unclear → `python3 scripts/hacker/skills/domain-route.py --hint "..."`.
+
+[SnailSploit/Claude-Red](https://github.com/SnailSploit/Claude-Red) is cloned by **`install.sh`** to `$HOME/tools/claude-red` and **symlinked** into `~/.audncode-platform/skills/`. `SLASH_COMMAND_TOOL_CHAR_BUDGET=28000` keeps the ~78 descriptions in the Skill listing. `/claude-red` is a catalog only.
+
+```sh
+~/openclaude/scripts/hacker/install-claude-red.sh
+~/openclaude/scripts/hacker/verify-claude-red.sh
+```
+
+Skip with `OPENCLAUDE_SKIP_CLAUDE_RED=1`.
+
 ## Files in this directory
 
 - `bootstrap.sh` — curl-pipe entry (clone + install)
@@ -121,4 +144,5 @@ IDA Pro / Burp are **not** auto-installed.
 - `hooks/glm-auto-continue.py`
 - `statusline.py` — copied into `dist/` at build
 - `install-reverse.sh` / `verify-reverse.sh` / `reverse-versions.env` / `wire-ghidra-mcp.py`
+- `install-claude-red.sh` / `verify-claude-red.sh` / `skills/claude-red/` / `skills/crack/` / `skills/domain-route.py` / `sync-user-memory.py`
 - `PROMPT.md` — copy-paste block for another AI to do the full install

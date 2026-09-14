@@ -9,6 +9,8 @@ import { registerPdfSkill } from './pdf.js'
 import { registerSimplifySkill } from './simplify.js'
 import { registerUpdateConfigSkill } from './updateConfig.js'
 import { registerReverseSkill } from './reverseSkill.js'
+import { registerCrackSkill } from './crackSkill.js'
+import { registerClaudeRedSkill } from './claudeRedSkill.js'
 
 /**
  * Initialize all bundled skills.
@@ -22,6 +24,8 @@ import { registerReverseSkill } from './reverseSkill.js'
 export function initBundledSkills(): void {
   registerUpdateConfigSkill()
   registerReverseSkill()
+  registerCrackSkill()
+  registerClaudeRedSkill()
   registerKeybindingsSkill()
   registerDebugSkill()
   registerSimplifySkill()

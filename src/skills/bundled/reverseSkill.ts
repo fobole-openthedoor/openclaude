@@ -12,7 +12,7 @@ export function registerReverseSkill(): void {
   registerBundledSkill({
     name: 'reverse-skill',
     description:
-      'Route reverse engineering, APK/SO/ELF/PE, JS crypto, Ghidra/IDA/radare2, Frida, firmware, and authorized security analysis to the reverse-skill pack. Use when the user asks to reverse, decompile, unpack, hook, or analyze a binary/APK/JS sample.',
+      '逆向 domain: reverse-engineer APK/SO/ELF/PE/JS with Ghidra/IDA/radare2/Frida to understand how a sample works. Use when the user asks to 逆向, 反编译, 分析样本, hook, or decompile. 破解/脱壳/去校验/补丁 → /crack. Live pentest/打站/SQLi → offensive-* skills.',
     userInvocable: true,
     disableModelInvocation: false,
     async getPromptForCommand(args) {

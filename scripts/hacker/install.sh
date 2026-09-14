@@ -111,8 +111,12 @@ ensure_env OPENCLAUDE_BIN "$PREFIX/bin/openclaude"
 ensure_env DISABLE_AUTOUPDATER 1
 ensure_env OPENCLAUDE_GIT_BRANCH "$BRANCH"
 ensure_env OPENCLAUDE_CONFIG_DIR "$CONFIG_DIR"
+ensure_env SLASH_COMMAND_TOOL_CHAR_BUDGET 28000
 
-mkdir -p "$CONFIG_DIR/hooks" "$CONFIG_DIR/skills/reverse-skill"
+mkdir -p "$CONFIG_DIR/hooks" \
+  "$CONFIG_DIR/skills/reverse-skill" \
+  "$CONFIG_DIR/skills/crack" \
+  "$CONFIG_DIR/skills/claude-red"
 install -m 755 "$KIT/hooks/glm-auto-continue.py" \
   "$CONFIG_DIR/hooks/glm-auto-continue.py"
 
@@ -129,6 +133,7 @@ STATUSLINE="python3 ${PREFIX}/dist/statusline.py"
 GLM_HOOK="python3 ${CONFIG_DIR}/hooks/glm-auto-continue.py"
 GHIDRA_HOME="${GHIDRA_INSTALL_DIR:-${GHIDRA_HOME:-$HOME/tools/ghidra}}"
 REVERSE_SKILL_ROOT="${REVERSE_SKILL_ROOT:-$HOME/tools/reverse-skill}"
+CLAUDE_RED_ROOT="${CLAUDE_RED_ROOT:-$HOME/tools/claude-red}"
 JAVA_HOME_VAL="${JAVA_HOME:-/usr/lib/jvm/java-21-openjdk-amd64}"
 
 seed_file() {
@@ -139,9 +144,10 @@ seed_file() {
     return 0
   fi
   python3 - "$src" "$dst" "$STATUSLINE" "$GLM_HOOK" \
-    "$GHIDRA_HOME" "$REVERSE_SKILL_ROOT" "$JAVA_HOME_VAL" <<'PY'
+    "$GHIDRA_HOME" "$REVERSE_SKILL_ROOT" "$JAVA_HOME_VAL" \
+    "$CLAUDE_RED_ROOT" "$PREFIX" <<'PY'
 import os, sys
-src, dst, statusline, hook, ghidra, reverse, java = sys.argv[1:8]
+src, dst, statusline, hook, ghidra, reverse, java, claude_red, fork = sys.argv[1:10]
 text = open(src, encoding="utf-8").read()
 text = (
     text.replace("__OPENCLAUDE_STATUSLINE__", statusline)
@@ -149,6 +155,8 @@ text = (
     .replace("__GHIDRA_HOME__", ghidra)
     .replace("__REVERSE_SKILL_ROOT__", reverse)
     .replace("__JAVA_HOME__", java)
+    .replace("__CLAUDE_RED_ROOT__", claude_red)
+    .replace("__OPENCLAUDE_FORK_ROOT__", fork)
 )
 os.makedirs(os.path.dirname(dst), exist_ok=True)
 with open(dst, "w", encoding="utf-8") as f:
@@ -163,6 +171,25 @@ seed_file "$KIT/openclaude.json.example" "$CONFIG_DIR/.openclaude.json"
 seed_file "$KIT/CLAUDE.md.example" "$CONFIG_DIR/CLAUDE.md"
 seed_file "$KIT/skills/reverse-skill/SKILL.md" \
   "$CONFIG_DIR/skills/reverse-skill/SKILL.md"
+seed_file "$KIT/skills/crack/SKILL.md" \
+  "$CONFIG_DIR/skills/crack/SKILL.md"
+seed_file "$KIT/skills/claude-red/SKILL.md" \
+  "$CONFIG_DIR/skills/claude-red/SKILL.md"
+if [ -f "$KIT/sync-user-memory.py" ]; then
+  python3 "$KIT/sync-user-memory.py" \
+    --claude-md "$CONFIG_DIR/CLAUDE.md" \
+    --fork-root "$PREFIX" \
+    --claude-red-root "$CLAUDE_RED_ROOT"
+fi
+
+if [ "${OPENCLAUDE_SKIP_CLAUDE_RED:-0}" != "1" ]; then
+  if [ -f "$KIT/install-claude-red.sh" ]; then
+    echo "openclaude-install: claude-red pack"
+    if ! sh "$KIT/install-claude-red.sh"; then
+      echo "openclaude-install: claude-red clone failed (non-fatal; retry $KIT/install-claude-red.sh)" >&2
+    fi
+  fi
+fi
 
 if command -v re-mcp-ghidra >/dev/null 2>&1 || [ -x "$HOME/.local/bin/re-mcp-ghidra" ]; then
   MCP_CMD="$(command -v re-mcp-ghidra 2>/dev/null || true)"
@@ -180,4 +207,5 @@ echo "openclaude-install: $PREFIX @ $(git -C "$PREFIX" log -1 --oneline)"
 echo "openclaude-install: set OPENAI_API_KEY in $ENV_FILE (beefsms), then: openclaude"
 echo "openclaude-install: later: openclaude update   (or $KIT/update.sh)"
 echo "openclaude-install: reverse env: $KIT/install-reverse.sh"
+echo "openclaude-install: claude-red: $KIT/install-claude-red.sh"
 echo "openclaude-install: or paste $KIT/PROMPT.md to another AI"
